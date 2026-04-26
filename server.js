@@ -16,13 +16,13 @@ const db = require('./db');
 const inscriptionRoutes = require('./Routes/Inscription');
 const loginRoutes = require('./Routes/Login');
 
-// ✅ CORRECTION ICI (noms différents)
 const adminCommissionnairesRoutes = require('./Routes/AdminCommissionnaires');
 const adminValidationRoutes = require('./Routes/AdminValidationRoutes');
-const biensRoutes = require('./routes/biens');
-const adminBiensRoutes = require('./routes/adminBiens');
-const agentBiensRoutes = require('./routes/agentBiens');
-const bienAnalyticsRoutes = require('./routes/bienAnalytics');
+
+const biensRoutes = require('./Routes/biens');
+const adminBiensRoutes = require('./Routes/adminBiens');
+const agentBiensRoutes = require('./Routes/agentBiens');
+const bienAnalyticsRoutes = require('./Routes/bienAnalytics');
 
 
 
