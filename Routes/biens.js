@@ -5,7 +5,9 @@
 const express = require('express');
 const router = express.Router();
 const upload = require('../middleware/uploadCloudinary');
-const authToken = require('../middleware/authToken');
+
+// ✅ middleware SHOPNET CORE (copié dans ce serveur)
+const authMiddleware = require('../middleware/authMiddleware');
 
 
 // ================= GET PUBLIC BIENS (CLIENT) =================
@@ -61,7 +63,7 @@ router.get('/public', async (req, res) => {
 // ================= CREATE BIEN =================
 router.post(
   '/create',
-  authToken,
+  authMiddleware,
   upload.array('images', 8),
   async (req, res) => {
     try {
@@ -115,7 +117,7 @@ router.post(
           status
         ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         [
-          req.user.id,
+          req.userId, // ✅ FIX IMPORTANT
           titre,
           type_bien,
           type_offre,
@@ -156,7 +158,7 @@ router.post(
 );
 
 
-// ================= GET BIEN BY ID (CLIENT / DETAIL) =================
+// ================= GET BIEN BY ID =================
 router.get('/:id', async (req, res) => {
   try {
     const db = req.db;
@@ -210,15 +212,16 @@ router.get('/:id', async (req, res) => {
 });
 
 
-// ================= GET BIENS AGENT (SECURISE) =================
-router.get('/agent/:id', authToken, async (req, res) => {
+// ================= GET MY BIENS (AGENT) =================
+router.get('/my', authMiddleware, async (req, res) => {
   try {
     const db = req.db;
-    const agentId = req.params.id;
 
     const [rows] = await db.query(
-      `SELECT * FROM biens_immobiliers WHERE commissionnaire_id = ? ORDER BY id DESC`,
-      [agentId]
+      `SELECT * FROM biens_immobiliers 
+       WHERE commissionnaire_id = ? 
+       ORDER BY id DESC`,
+      [req.userId]
     );
 
     res.json({
@@ -238,4 +241,3 @@ router.get('/agent/:id', authToken, async (req, res) => {
 
 
 module.exports = router;
-

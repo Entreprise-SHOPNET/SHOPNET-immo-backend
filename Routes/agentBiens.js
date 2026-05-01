@@ -3,16 +3,19 @@
 
 const express = require('express');
 const router = express.Router();
-const authToken = require('../middleware/authToken');
+
+// ✅ NOUVEAU MIDDLEWARE (SHOPNET CORE)
+const authMiddleware = require('../middleware/authMiddleware');
+
 
 // ======================================================
 // 🔵 GET BIENS DE L'AGENT CONNECTÉ
 // ======================================================
-router.get('/my-biens', authToken, async (req, res) => {
+router.get('/my-biens', authMiddleware, async (req, res) => {
   try {
     const db = req.db;
 
-    const agentId = req.user.id; // 🔐 sécurisé via token
+    const agentId = req.userId; // ✅ CORRECTION IMPORTANTE
 
     const [biens] = await db.query(
       `SELECT 
@@ -69,4 +72,3 @@ router.get('/my-biens', authToken, async (req, res) => {
 });
 
 module.exports = router;
-

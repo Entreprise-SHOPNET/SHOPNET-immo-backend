@@ -12,19 +12,15 @@ const { Server } = require('socket.io');
 // ================= DB =================
 const db = require('./db');
 
-// ================= ROUTES =================
-const inscriptionRoutes = require('./Routes/Inscription');
-const loginRoutes = require('./Routes/Login');
-
-const adminCommissionnairesRoutes = require('./Routes/AdminCommissionnaires');
-const adminValidationRoutes = require('./Routes/AdminValidationRoutes');
-
+// ================= ROUTES IMMOBILIER =================
 const biensRoutes = require('./Routes/biens');
 const adminBiensRoutes = require('./Routes/adminBiens');
 const agentBiensRoutes = require('./Routes/agentBiens');
 const bienAnalyticsRoutes = require('./Routes/bienAnalytics');
 
-
+// ================= ROUTES ADMIN =================
+const adminValidationRoutes = require('./Routes/AdminValidationRoutes');
+const adminCommissionnairesRoutes = require('./Routes/AdminCommissionnaires');
 
 // ================= APP =================
 const app = express();
@@ -33,8 +29,6 @@ app.set('trust proxy', 1);
 // ================= MIDDLEWARES =================
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
-
-// 🔥 IMPORTANT FIX COOKIE
 app.use(cookieParser());
 
 app.use(cors({
@@ -64,7 +58,6 @@ const io = new Server(server, {
   cors: { origin: '*', methods: ['GET', 'POST'] }
 });
 
-// ================= SOCKET LOGIC =================
 const connectedUsers = new Map();
 
 io.on('connection', (socket) => {
@@ -85,7 +78,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// ================= GLOBAL HELPERS =================
+// ================= NOTIFICATION SYSTEM =================
 app.set('notifyUser', (userId, message) => {
   const sockets = connectedUsers.get(userId);
   if (sockets) {
@@ -93,43 +86,27 @@ app.set('notifyUser', (userId, message) => {
   }
 });
 
-// ================= ROUTES =================
+// ================= ROUTES IMMOBILIER =================
+app.use('/api/biens', biensRoutes);
+app.use('/api/admin/biens', adminBiensRoutes);
+app.use('/api/agent', agentBiensRoutes);
+app.use('/api/analytics', bienAnalyticsRoutes);
 
-// 🧑‍💼 Commissionnaires
- 
-// 🧑‍💼 Commissionnaires (auth)
-app.use('/api/commissionnaires', inscriptionRoutes);
-app.use('/api/commissionnaires', loginRoutes);
-app.use('/api/biens', biensRoutes);               // 🏠 BIENS (PUBLIC + AGENT)
-app.use('/api/admin/biens', adminBiensRoutes);      // 🛡️ ADMIN BIENS
-app.use('/api/agent', agentBiensRoutes);     // 👨‍💼 AGENT BIENS
-app.use('/api/analytics', bienAnalyticsRoutes);// 📊 ANALYTICS BIENS
-
-
-
-
-// 📊 ADMIN - Voir les demandes + stats
-app.use('/api/admin/commissionnaires', adminCommissionnairesRoutes);
-
-// ✅❌ ADMIN - Validation / Rejet
+// ================= ROUTES ADMIN =================
 app.use('/api/admin', adminValidationRoutes);
-
-// ================= DB TEST =================
-async function testDatabaseConnection() {
-  try {
-    await db.query('SELECT 1');
-    return true;
-  } catch (err) {
-    console.error('❌ DATABASE ERROR:', err.message);
-    return false;
-  }
-}
+app.use('/api/admin/commissionnaires', adminCommissionnairesRoutes);
 
 // ================= HEALTH CHECK =================
 app.get('/health', (req, res) => {
   res.json({
     status: 'OK',
-    app: 'SHOPNET-IMMO',
+    app: 'SHOPNET-IMMOBILIER + CORE LINKED',
+    modules: {
+      biens: true,
+      admin: true,
+      analytics: true,
+      auth: 'SHOPNET CORE'
+    },
     db: 'CONNECTED',
     time: new Date()
   });
@@ -148,22 +125,14 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, '0.0.0.0', async () => {
-
-  const dbStatus = await testDatabaseConnection();
-
   console.log('\n======================================');
-  console.log('🚀 SHOPNET-IMMO SERVER DEMARRÉ');
+  console.log('🚀 SHOPNET IMMOBILIER SERVER');
   console.log('======================================');
   console.log(`📡 URL: http://localhost:${PORT}`);
-
-  if (dbStatus) {
-    console.log('🗄️ Database: MySQL CONNECTED ✅');
-  } else {
-    console.log('🗄️ Database: CONNECTION FAILED ❌');
-  }
-
   console.log('🧠 Status: READY');
+  console.log('🔐 Auth: SHOPNET CORE (external)');
   console.log('======================================\n');
 });
 
 module.exports = server;
+

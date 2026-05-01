@@ -2,17 +2,19 @@
 
 const express = require('express');
 const router = express.Router();
-const authToken = require('../middleware/authToken');
+
+// ✅ NOUVEAU MIDDLEWARE CENTRAL (SHOPNET CORE)
+const authMiddleware = require('../middleware/authMiddleware');
+
 
 // ======================================================
-// 👁️ 1. INCREMENT VIEW (quand un client regarde un bien)
+// 👁️ 1. INCREMENT VIEW (client view)
 // ======================================================
 router.post('/view/:bienId', async (req, res) => {
   try {
     const db = req.db;
     const bienId = req.params.bienId;
 
-    // vérifier si existe
     const [rows] = await db.query(
       `SELECT * FROM bien_stats WHERE bien_id = ?`,
       [bienId]
@@ -73,7 +75,7 @@ router.post('/whatsapp/:bienId', async (req, res) => {
 
 
 // ======================================================
-// 📩 3. CONTACT CLIENT (formulaire intérêt)
+// 📩 3. CONTACT CLIENT
 // ======================================================
 router.post('/contact/:bienId', async (req, res) => {
   try {
@@ -100,9 +102,9 @@ router.post('/contact/:bienId', async (req, res) => {
 
 
 // ======================================================
-// 📊 4. STATS D'UN BIEN (AGENT)
+// 📊 4. STATS D'UN BIEN (AGENT SECURISÉ)
 // ======================================================
-router.get('/stats/:bienId', authToken, async (req, res) => {
+router.get('/stats/:bienId', authMiddleware, async (req, res) => {
   try {
     const db = req.db;
     const bienId = req.params.bienId;
@@ -135,7 +137,10 @@ router.get('/stats/:bienId', authToken, async (req, res) => {
 });
 
 
-router.get('/bien/:id', authToken, async (req, res) => {
+// ======================================================
+// 📊 5. DETAIL STATS BIEN (VERSION CLEAN)
+// ======================================================
+router.get('/bien/:id', authMiddleware, async (req, res) => {
   try {
     const db = req.db;
     const bienId = req.params.id;
@@ -151,7 +156,7 @@ router.get('/bien/:id', authToken, async (req, res) => {
         stats: {
           views: 0,
           whatsapp_clicks: 0,
-          appels: 0
+          contact_requests: 0
         }
       });
     }
@@ -169,7 +174,6 @@ router.get('/bien/:id', authToken, async (req, res) => {
     });
   }
 });
-
 
 
 module.exports = router;

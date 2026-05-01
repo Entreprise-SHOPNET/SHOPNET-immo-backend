@@ -2,12 +2,15 @@
 
 const express = require('express');
 const router = express.Router();
-const authToken = require('../middleware/authToken');
+
+// ✅ NOUVEAU MIDDLEWARE (SHOPNET CORE)
+const authMiddleware = require('../middleware/authMiddleware');
+
 
 // ======================================================
 // 🔵 1. LISTE DES BIENS EN ATTENTE (PENDING)
 // ======================================================
-router.get('/pending', authToken, async (req, res) => {
+router.get('/pending', authMiddleware, async (req, res) => {
   try {
     const db = req.db;
 
@@ -53,7 +56,7 @@ router.get('/pending', authToken, async (req, res) => {
 // ======================================================
 // 🟢 2. APPROUVER UN BIEN
 // ======================================================
-router.put('/approve/:id', authToken, async (req, res) => {
+router.put('/approve/:id', authMiddleware, async (req, res) => {
   try {
     const db = req.db;
 
@@ -87,7 +90,7 @@ router.put('/approve/:id', authToken, async (req, res) => {
 // ======================================================
 // 🔴 3. REJETER UN BIEN (SUPPRESSION)
 // ======================================================
-router.delete('/reject/:id', authToken, async (req, res) => {
+router.delete('/reject/:id', authMiddleware, async (req, res) => {
   try {
     const db = req.db;
 
@@ -162,5 +165,6 @@ router.get('/approved', async (req, res) => {
     });
   }
 });
+
 
 module.exports = router;
