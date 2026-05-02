@@ -3,14 +3,11 @@
 const express = require('express');
 const router = express.Router();
 
-// ✅ NOUVEAU MIDDLEWARE (SHOPNET CORE)
-const authMiddleware = require('../middleware/authMiddleware');
-
 
 // ======================================================
 // 🔵 1. LISTE DES BIENS EN ATTENTE (PENDING)
 // ======================================================
-router.get('/pending', authMiddleware, async (req, res) => {
+router.get('/pending', async (req, res) => {
   try {
     const db = req.db;
 
@@ -31,10 +28,7 @@ router.get('/pending', authMiddleware, async (req, res) => {
         images = [];
       }
 
-      return {
-        ...bien,
-        images
-      };
+      return { ...bien, images };
     });
 
     res.json({
@@ -56,7 +50,7 @@ router.get('/pending', authMiddleware, async (req, res) => {
 // ======================================================
 // 🟢 2. APPROUVER UN BIEN
 // ======================================================
-router.put('/approve/:id', authMiddleware, async (req, res) => {
+router.put('/approve/:id', async (req, res) => {
   try {
     const db = req.db;
 
@@ -90,7 +84,7 @@ router.put('/approve/:id', authMiddleware, async (req, res) => {
 // ======================================================
 // 🔴 3. REJETER UN BIEN (SUPPRESSION)
 // ======================================================
-router.delete('/reject/:id', authMiddleware, async (req, res) => {
+router.delete('/reject/:id', async (req, res) => {
   try {
     const db = req.db;
 
@@ -122,7 +116,7 @@ router.delete('/reject/:id', authMiddleware, async (req, res) => {
 
 
 // ======================================================
-// 🟣 4. LISTE DES BIENS APPROUVÉS (PUBLIC)
+// 🟣 4. LISTE DES BIENS APPROUVÉS
 // ======================================================
 router.get('/approved', async (req, res) => {
   try {
@@ -145,10 +139,7 @@ router.get('/approved', async (req, res) => {
         images = [];
       }
 
-      return {
-        ...bien,
-        images
-      };
+      return { ...bien, images };
     });
 
     res.json({
@@ -165,6 +156,5 @@ router.get('/approved', async (req, res) => {
     });
   }
 });
-
 
 module.exports = router;
