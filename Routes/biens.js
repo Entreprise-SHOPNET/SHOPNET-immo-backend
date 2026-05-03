@@ -239,4 +239,93 @@ router.get('/my', authMiddleware, async (req, res) => {
   }
 });
 
+
+
+
+// ================= UPDATE BIEN =================
+router.put('/update/:id', authMiddleware, async (req, res) => {
+  try {
+    const db = req.db;
+    const bienId = req.params.id;
+    const userId = req.userId;
+
+    const {
+      titre,
+      type_bien,
+      type_offre,
+      prix,
+      devise,
+      ville,
+      commune,
+      quartier,
+      reference,
+      description,
+      whatsapp,
+      telephone
+    } = req.body;
+
+    // 🔐 Vérifier que le bien appartient à l'utilisateur
+    const [rows] = await db.query(
+      `SELECT id FROM biens_immobiliers 
+       WHERE id = ? AND commissionnaire_id = ?`,
+      [bienId, userId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(403).json({
+        success: false,
+        message: "Non autorisé"
+      });
+    }
+
+    // 🔄 UPDATE
+    await db.query(
+      `UPDATE biens_immobiliers SET
+        titre = ?,
+        type_bien = ?,
+        type_offre = ?,
+        prix = ?,
+        devise = ?,
+        ville = ?,
+        commune = ?,
+        quartier = ?,
+        reference = ?,
+        description = ?,
+        whatsapp = ?,
+        telephone = ?,
+        status = 'pending' -- 🔥 revalidation après modification
+      WHERE id = ?`,
+      [
+        titre,
+        type_bien,
+        type_offre,
+        prix,
+        devise,
+        ville,
+        commune,
+        quartier,
+        reference,
+        description,
+        whatsapp,
+        telephone,
+        bienId
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: "Bien modifié avec succès (en attente de validation)"
+    });
+
+  } catch (err) {
+    console.error("UPDATE BIEN ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: "Erreur serveur"
+    });
+  }
+});
+
+
+
 module.exports = router;
